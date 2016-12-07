@@ -7,5 +7,9 @@ def main():
     # return "Welcome!" (Step 1)
     return render_template('index.html') # (Step 2)
 
+@app.route('/showSignUp') # adds signup page to routes (Step 3)
+def showSignUp():
+    return render_template('signup.html')
+
 if __name__ == "__main__":
     app.run()
