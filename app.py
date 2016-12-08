@@ -17,20 +17,6 @@ app.config['MYSQL_DATABASE_DB'] = 'BucketList'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
-conn = mysql.connect()
-cursor = conn.cursor()
-_hashed_password = generate_password_hash(_password)
-
-cursor.callproc('sp_createUser',(_name,_email,_hashed_password))
-
-data = cursor.fetchall()
-
-if len(data) is 0:
-    conn.commit()
-    json.dumps({'message':'User created successfully !'})
-else:
-    json.dumps({'error':str(data[0])})
-
 @app.route("/")
 def main():
     # return "Welcome!" (Step 1)
@@ -49,7 +35,22 @@ def signUp():
     _password = request.form['inputPassword']
     # validate the received values (Step 6)
     if _name and _email and _password:
-        return json.dumps({'html':'<span>All fields good !!</span>'})
+        # return json.dumps({'html':'<span>All fields good !!</span>'}) # from earlier step/testing
+
+        # below added to enable POST to mySQL w/ confirmation (Step 8)
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        _hashed_password = generate_password_hash(_password)
+
+        cursor.callproc('sp_createUser',(_name,_email,_hashed_password))
+
+        data = cursor.fetchall()
+
+        if len(data) is 0:
+            conn.commit()
+            json.dumps({'message':'User created successfully !'})
+        else:
+            json.dumps({'error':str(data[0])})
     else:
         return json.dumps({'html':'<span>Enter the required fields</span>'})
 
