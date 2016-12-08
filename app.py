@@ -2,7 +2,34 @@
 # from flask import Flask, render_template # (Step 2)
 # from flask import Flask, render_template, request # adding to enable view of posted values (Step 5)
 from flask import Flask, render_template, json, request # adding for json use
+from flask.ext.mysql import MySQL # adding for mySQL use (Step 7)
+from werkzeug import generate_password_hash, check_password_hash
+
 app = Flask(__name__)
+mysql = MySQL() # (Step 7)
+
+# MySQL configurations (Step 7)
+app.config['MYSQL_DATABASE_USER'] = 'root'
+
+app.config['MYSQL_DATABASE_PASSWORD'] = '' # Update for testing
+
+app.config['MYSQL_DATABASE_DB'] = 'BucketList'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+mysql.init_app(app)
+
+conn = mysql.connect()
+cursor = conn.cursor()
+_hashed_password = generate_password_hash(_password)
+
+cursor.callproc('sp_createUser',(_name,_email,_hashed_password))
+
+data = cursor.fetchall()
+
+if len(data) is 0:
+    conn.commit()
+    json.dumps({'message':'User created successfully !'})
+else:
+    json.dumps({'error':str(data[0])})
 
 @app.route("/")
 def main():
