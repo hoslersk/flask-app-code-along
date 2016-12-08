@@ -29,30 +29,38 @@ def showSignUp():
 # @app.route('/signUp') # adding route for signup (Step 4)
 @app.route('/signUp', methods=['POST']) # adding method for jQuery and AJAX usage (Step 5)
 def signUp():
-    # read the posted values from the UI (Step 6)
-    _name = request.form['inputName']
-    _email = request.form['inputEmail']
-    _password = request.form['inputPassword']
-    # validate the received values (Step 6)
-    if _name and _email and _password:
-        # return json.dumps({'html':'<span>All fields good !!</span>'}) # from earlier step/testing
+    try:
 
-        # below added to enable POST to mySQL w/ confirmation (Step 8)
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        _hashed_password = generate_password_hash(_password)
+        # read the posted values from the UI (Step 6)
+        _name = request.form['inputName']
+        _email = request.form['inputEmail']
+        _password = request.form['inputPassword']
+        # validate the received values (Step 6)
+        if _name and _email and _password:
+            # return json.dumps({'html':'<span>All fields good !!</span>'}) # from earlier step/testing
 
-        cursor.callproc('sp_createUser',(_name,_email,_hashed_password))
+            # below added to enable POST to mySQL w/ confirmation (Step 8)
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            _hashed_password = generate_password_hash(_password)
 
-        data = cursor.fetchall()
+            cursor.callproc('sp_createUser',(_name,_email,_hashed_password))
 
-        if len(data) is 0:
-            conn.commit()
-            json.dumps({'message':'User created successfully !'})
+            data = cursor.fetchall()
+
+            if len(data) is 0:
+                conn.commit()
+                return json.dumps({'message':'User created successfully !'})
+            else:
+                return json.dumps({'error':str(data[0])})
         else:
-            json.dumps({'error':str(data[0])})
-    else:
-        return json.dumps({'html':'<span>Enter the required fields</span>'})
+            return json.dumps({'html':'<span>Enter the required fields</span>'})
+
+    except Exception as e:
+        return json.dumps({'error':str(e)})
+    finally:
+        cursor.close()
+        conn.close()
 
 if __name__ == "__main__":
     app.run()
